@@ -6,20 +6,55 @@
     <title>梅小文 | 红色讲解助手</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#FAF6F0;height:100vh;overflow:hidden}
+        body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#FAF6F0;min-height:100vh;color:#333}
         .header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:linear-gradient(135deg,#8B0000,#A52A2A);border-bottom:3px solid #DAA520;position:fixed;top:0;left:0;right:0;z-index:100}
         .header-spacer{height:75px}
         .header-left{display:flex;align-items:center;gap:12px}
-        .logo{width:44px;height:44px;border-radius:50%;background:#FDF8F0;display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid #DAA520}
+        .logo{width:44px;height:44px;border-radius:50%;background:#FDF8F0;display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid #DAA520;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
         .header-title{font-size:17px;font-weight:600;color:#FFF8E7;letter-spacing:1px}
         .header-sub{font-size:11px;color:rgba(255,248,231,0.85);margin-top:2px}
         .header-right{font-size:11px;color:rgba(255,248,231,0.7);text-align:right;line-height:1.4}
-        #chatFrame{width:100%;height:calc(100vh - 75px);border:none;margin-top:75px}
-        .error-overlay{display:none;position:fixed;top:75px;left:0;right:0;bottom:0;background:#FAF6F0;z-index:200;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
-        .error-overlay.show{display:flex}
-        .error-overlay h3{color:#8B0000;font-size:18px;margin-bottom:12px}
-        .error-overlay p{color:#666;font-size:14px;line-height:1.7;margin-bottom:20px}
-        .error-overlay a{display:inline-block;padding:10px 24px;background:#8B0000;color:#FFD700;text-decoration:none;border-radius:20px;font-size:14px;font-weight:600}
+        .main-content{max-width:480px;margin:0 auto;padding:12px 8px;display:flex;flex-direction:column;min-height:calc(100vh - 75px)}
+        .chat-container{flex:1;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:flex;flex-direction:column}
+        .chat-header{padding:14px 16px;background:#FDF8F0;border-bottom:1px solid #E8E0D4;text-align:center}
+        .chat-header h2{font-size:16px;color:#8B0000;margin-bottom:4px}
+        .chat-header p{font-size:12px;color:#888}
+        .chat-placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center}
+        .chat-placeholder .avatar{width:88px;height:88px;border-radius:50%;border:3px solid #DAA520;margin-bottom:18px;background:#FDF8F0;display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 4px 12px rgba(218,165,32,0.15)}
+        .chat-placeholder h3{font-size:20px;color:#8B0000;margin-bottom:8px}
+        .chat-placeholder p{font-size:14px;color:#666;line-height:1.7;max-width:300px}
+        .chat-placeholder .btn{margin-top:24px;padding:11px 28px;background:linear-gradient(135deg,#8B0000,#A52A2A);color:#FFD700;border:none;border-radius:22px;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.3s;box-shadow:0 3px 10px rgba(139,0,0,0.2);letter-spacing:1px}
+        .chat-placeholder .btn:hover{background:linear-gradient(135deg,#A52A2A,#C0392B);transform:translateY(-2px);box-shadow:0 5px 15px rgba(139,0,0,0.3)}
+        .chat-placeholder .btn:active{transform:translateY(0)}
+        .footer{text-align:center;padding:14px 16px;font-size:11px;color:#aaa}
+        .mxw-character{position:fixed;bottom:100px;right:16px;z-index:99;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+        .mxw-char-img{width:70px;height:148px;position:relative;background:transparent}
+        .mxw-emoji{font-size:80px;animation:mxwBreathe 3.5s ease-in-out infinite;display:block;text-align:center;line-height:148px}
+        @keyframes mxwBreathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+        .mxw-bubble{position:fixed;bottom:254px;right:16px;background:#fff;color:#8B0000;padding:10px 14px;border-radius:14px 14px 4px 14px;font-size:12px;box-shadow:0 2px 10px rgba(139,0,0,0.1);z-index:99;max-width:155px;line-height:1.5;border:1px solid #E8E0D4;opacity:0;transform:translateY(6px);transition:opacity 0.3s ease,transform 0.3s ease;pointer-events:none}
+        .mxw-bubble.show{opacity:1;transform:translateY(0)}
+        .chat-fullscreen{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:#fff}
+        .chat-fullscreen.active{display:flex;flex-direction:column}
+        .chat-nav{height:48px;background:linear-gradient(135deg,#8B0000,#A52A2A);display:flex;align-items:center;justify-content:space-between;padding:0 12px;flex-shrink:0}
+        .chat-nav-title{color:#FFF8E7;font-size:16px;font-weight:600}
+        .chat-nav-close{background:none;border:none;color:#FFF8E7;font-size:28px;cursor:pointer;padding:2px 8px;line-height:1}
+        .chat-iframe-wrap{flex:1;position:relative}
+        .chat-iframe-wrap iframe{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;border:none}
+        .chat-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+        .chat-loading-spinner{width:40px;height:40px;border:3px solid #e0d5c5;border-top:3px solid #8B0000;border-radius:50%;animation:mxwSpin 0.8s linear infinite;margin:0 auto 16px}
+        @keyframes mxwSpin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+        .chat-loading-text{font-size:15px;color:#8B0000;font-weight:500}
+        @media(max-width:480px){
+            .header{padding:10px 14px}
+            .logo{width:38px;height:38px;font-size:20px}
+            .header-title{font-size:15px}
+            .header-sub{font-size:10px}
+            .main-content{padding:8px 4px}
+            .mxw-character{bottom:80px;right:10px}
+            .mxw-char-img{width:58px;height:123px}
+            .mxw-emoji{font-size:64px;line-height:123px}
+            .mxw-bubble{bottom:208px;right:10px;font-size:11px;max-width:130px}
+        }
     </style>
 </head>
 <body>
@@ -34,24 +69,51 @@
         <div class="header-right">厚植家国情怀<br>赓续红色血脉</div>
     </header>
     <div class="header-spacer"></div>
-    <iframe id="chatFrame" src="https://www.coze.cn/store/agent/7672751495569276978" allow="clipboard-read;clipboard-write;microphone"></iframe>
-    <div class="error-overlay" id="errorOverlay">
-        <h3>⏳ 加载中...</h3>
-        <p>如果长时间无法加载，请尝试直接打开</p>
-        <a href="https://www.coze.cn/store/agent/7672751495569276978" target="_blank">直接打开梅小文对话 →</a>
+    <div class="main-content">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>🏛️ 梅小文讲红色故事</h2>
+                <p>梅园新村 × 南华长征古道 | 输入你想了解的历史～</p>
+            </div>
+            <div class="chat-placeholder" id="chatArea">
+                <div class="avatar">🏛️</div>
+                <h3>梅小文等你提问</h3>
+                <p>南京梅园新村 · 云南南华长征古道<br>红色历史、人物故事、参观导览，都可以问我哦！</p>
+                <button class="btn" onclick="startChat()">开始对话</button>
+            </div>
+        </div>
+    </div>
+    <div class="footer">© 2026 东南大学建筑学院梅美与共实践团 · 梅园新村讲解助手</div>
+    <div class="mxw-bubble" id="mxwBubble">嗨～想了解梅园新村还是南华的故事呢？😊</div>
+    <div class="mxw-character" id="mxwChar" onclick="mxwInteract()">
+        <div class="mxw-char-img">
+            <span class="mxw-emoji" id="mxwEmoji">🧑‍🎓</span>
+        </div>
+    </div>
+    <div class="chat-fullscreen" id="chatFullscreen">
+        <div class="chat-nav">
+            <span class="chat-nav-title">梅小文 · 红色讲解助手</span>
+            <button class="chat-nav-close" onclick="closeChat()">&times;</button>
+        </div>
+        <div class="chat-iframe-wrap" id="chatIframeWrap">
+            <div class="chat-loading">
+                <div class="chat-loading-spinner"></div>
+                <div class="chat-loading-text">正在打开梅小文...</div>
+            </div>
+        </div>
     </div>
     <script>
-        setTimeout(function(){
-            var f=document.getElementById('chatFrame');
-            try{
-                if(!f.contentDocument&&!f.contentWindow){
-                    document.getElementById('errorOverlay').classList.add('show');
-                }
-            }catch(e){}
-        },12000);
-        document.getElementById('chatFrame').onload=function(){
-            document.getElementById('errorOverlay').classList.remove('show');
-        };
+        var COZE_URL='https://www.coze.cn/store/agent/7672751495569276978';
+        var mxwEmojis=['🧑‍🎓','👍','📖','🤔'];
+        var mxwBubbles=['嗨～想了解梅园新村还是南华的故事呢？😊','梅园的故事特别精彩！给你点赞～👍','梅园的每一处旧址都是一段历史～📖','不知道你想了解哪方面？点我问问看！🤔'];
+        var currentIdx=0,bubbleTimer;
+        var bubble=document.getElementById('mxwBubble');
+        var emoji=document.getElementById('mxwEmoji');
+        setTimeout(function(){bubble.classList.add('show');bubbleTimer=setTimeout(hideBubble,4000)},1500);
+        function hideBubble(){bubble.classList.remove('show')}
+        function mxwInteract(){currentIdx=(currentIdx+1)%mxwEmojis.length;emoji.textContent=mxwEmojis[currentIdx];bubble.textContent=mxwBubbles[currentIdx];bubble.classList.add('show');clearTimeout(bubbleTimer);bubbleTimer=setTimeout(hideBubble,3500)}
+        function startChat(){document.getElementById('chatFullscreen').classList.add('active');setTimeout(function(){document.getElementById('chatIframeWrap').innerHTML='<iframe src="'+COZE_URL+'" allow="clipboard-read;clipboard-write;microphone"></iframe>'},500)}
+        function closeChat(){document.getElementById('chatFullscreen').classList.remove('active');document.getElementById('chatIframeWrap').innerHTML='<div class="chat-loading"><div class="chat-loading-spinner"></div><div class="chat-loading-text">正在打开梅小文...</div></div>'}
     </script>
 </body>
 </html>
