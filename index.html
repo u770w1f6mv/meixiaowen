@@ -5,282 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>梅小文 | 红色讲解助手</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
-            background: #FAF6F0;
-            min-height: 100vh;
-            color: #333;
-        }
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 24px;
-            background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);
-            border-bottom: 3px solid #DAA520;
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 10000;
-        }
-        .header-spacer { height: 90px; }
-        .header-left { display: flex; align-items: center; gap: 14px; }
-        .logo {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            border: 2px solid #DAA520;
-            object-fit: cover;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .header-title { font-size: 19px; font-weight: 600; color: #FFF8E7; letter-spacing: 1.5px; }
-        .header-subtitle { font-size: 12px; color: rgba(255,248,231,0.9); margin-top: 3px; letter-spacing: 0.5px; }
-        .header-right { font-size: 12px; color: rgba(255,248,231,0.8); text-align: right; line-height: 1.4; }
-        .main-content {
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 12px 8px;
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 90px);
-        }
-        .chat-placeholder {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            text-align: center;
-        }
-        .chat-placeholder .avatar {
-            width: 88px; height: 88px;
-            border-radius: 50%;
-            border: 3px solid #DAA520;
-            margin-bottom: 18px;
-            background: #FDF8F0;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 40px;
-            box-shadow: 0 4px 12px rgba(218,165,32,0.15);
-        }
-        .chat-placeholder h3 { font-size: 20px; color: #8B0000; margin-bottom: 8px; }
-        .chat-placeholder p { font-size: 14px; color: #666; line-height: 1.7; max-width: 300px; }
-        .chat-placeholder .btn {
-            margin-top: 24px;
-            padding: 11px 28px;
-            background: linear-gradient(135deg, #8B0000, #A52A2A);
-            color: #FFD700;
-            border: none;
-            border-radius: 22px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 3px 10px rgba(139,0,0,0.2);
-            letter-spacing: 1px;
-        }
-        .chat-placeholder .btn:hover {
-            background: linear-gradient(135deg, #A52A2A, #C0392B);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139,0,0,0.3);
-        }
-        .footer {
-            text-align: center;
-            padding: 14px 16px;
-            font-size: 11px;
-            color: #aaa;
-        }
-        /* 加载覆盖层 */
-        #loadingOverlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #FAF6F0;
-            z-index: 99999;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        #loadingOverlay.show { display: flex; }
-        .loading-spinner {
-            width: 50px; height: 50px;
-            border: 4px solid #e0d5c5;
-            border-top: 4px solid #8B0000;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 20px;
-        }
-        @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
-        .loading-text { font-size: 16px; color: #8B0000; font-weight: 500; margin-bottom: 10px; }
-        .loading-sub { font-size: 13px; color: #999; }
-        .loading-fallback {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: #fff;
-            border: 1px solid #DAA520;
-            border-radius: 20px;
-            color: #8B0000;
-            font-size: 13px;
-            cursor: pointer;
-            text-decoration: none;
-            display: none;
-        }
-        .loading-fallback.show { display: inline-block; }
-        /* 聊天容器 */
-        #chatContainer {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 99998;
-            background: #fff;
-        }
-        #chatContainer.show { display: block; }
-        #coze-chat { width: 100%; height: 100%; }
-        /* 返回按钮 */
-        .back-btn {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            z-index: 999999;
-            background: rgba(139,0,0,0.8);
-            color: #FFF8E7;
-            border: none;
-            border-radius: 50%;
-            width: 40px; height: 40px;
-            font-size: 20px;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        .back-btn.show { display: flex; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#FAF6F0;height:100vh;overflow:hidden}
+        .header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:linear-gradient(135deg,#8B0000,#A52A2A);border-bottom:3px solid #DAA520;position:fixed;top:0;left:0;right:0;z-index:100}
+        .header-spacer{height:75px}
+        .header-left{display:flex;align-items:center;gap:12px}
+        .logo{width:44px;height:44px;border-radius:50%;background:#FDF8F0;display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid #DAA520}
+        .header-title{font-size:17px;font-weight:600;color:#FFF8E7;letter-spacing:1px}
+        .header-sub{font-size:11px;color:rgba(255,248,231,0.85);margin-top:2px}
+        .header-right{font-size:11px;color:rgba(255,248,231,0.7);text-align:right;line-height:1.4}
+        #chatFrame{width:100%;height:calc(100vh - 75px);border:none;margin-top:75px}
+        .error-overlay{display:none;position:fixed;top:75px;left:0;right:0;bottom:0;background:#FAF6F0;z-index:200;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+        .error-overlay.show{display:flex}
+        .error-overlay h3{color:#8B0000;font-size:18px;margin-bottom:12px}
+        .error-overlay p{color:#666;font-size:14px;line-height:1.7;margin-bottom:20px}
+        .error-overlay a{display:inline-block;padding:10px 24px;background:#8B0000;color:#FFD700;text-decoration:none;border-radius:20px;font-size:14px;font-weight:600}
     </style>
 </head>
 <body>
-
-    <!-- 顶部红色导航 -->
-    <header class="header" id="mainHeader">
+    <header class="header">
         <div class="header-left">
-            <div class="logo" style="background:#FDF8F0;display:flex;align-items:center;justify-content:center;font-size:28px;">🏛️</div>
+            <div class="logo">🏛️</div>
             <div>
                 <div class="header-title">梅小文 · 红色讲解助手</div>
-                <div class="header-subtitle">东南大学建筑学院梅美与共实践团 出品</div>
+                <div class="header-sub">东南大学建筑学院梅美与共实践团</div>
             </div>
         </div>
-        <div class="header-right">
-            厚植家国情怀<br>赓续红色血脉
-        </div>
+        <div class="header-right">厚植家国情怀<br>赓续红色血脉</div>
     </header>
-    <div class="header-spacer" id="headerSpacer"></div>
-
-    <!-- 主内容 -->
-    <div class="main-content" id="mainContent">
-        <div class="chat-placeholder" id="chatArea">
-            <div class="avatar">🏛️</div>
-            <h3>梅小文讲红色故事</h3>
-            <p>梅园新村 × 南华长征古道<br>输入你想了解的历史～</p>
-            <button class="btn" onclick="startChat()">开始对话</button>
-        </div>
+    <div class="header-spacer"></div>
+    <iframe id="chatFrame" src="https://www.coze.cn/store/agent/7672751495569276978" allow="clipboard-read;clipboard-write;microphone"></iframe>
+    <div class="error-overlay" id="errorOverlay">
+        <h3>⏳ 加载中...</h3>
+        <p>如果长时间无法加载，请尝试直接打开</p>
+        <a href="https://www.coze.cn/store/agent/7672751495569276978" target="_blank">直接打开梅小文对话 →</a>
     </div>
-
-    <!-- 加载覆盖层 -->
-    <div id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">正在连接梅小文...</div>
-        <div class="loading-sub" id="loadingSub">首次加载可能需要几秒钟</div>
-        <a class="loading-fallback" id="fallbackBtn" href="https://www.coze.cn/store/agent/7672751495569276978" target="_blank">
-            点我直接打开对话 →
-        </a>
-    </div>
-
-    <!-- 聊天容器 -->
-    <div id="chatContainer">
-        <div id="coze-chat"></div>
-    </div>
-
-    <!-- 返回按钮 -->
-    <button class="back-btn" id="backBtn" onclick="goHome()"></button>
-
-    <div class="footer" id="mainFooter">
-        © 2026 东南大学建筑学院 · 梅美与共暑期实践团
-    </div>
-
     <script>
-        // Bot ID 和 PAT 令牌
-        const BOT_ID = '7672718942758256680';
-        const PAT_TOKEN = 'pat_MeQO9ctNEYbVnnsNreaxediUPXLsrwOWIBgtbVOjpyVOiEQnrBsBzdGpKLy7NOX0';
-
-        function startChat() {
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            const fallbackBtn = document.getElementById('fallbackBtn');
-            const loadingSub = document.getElementById('loadingSub');
-            
-            // 显示加载层
-            loadingOverlay.classList.add('show');
-            document.getElementById('mainHeader').style.display = 'none';
-            document.getElementById('headerSpacer').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'none';
-            document.getElementById('mainFooter').style.display = 'none';
-
-            // 加载 Chat SDK 脚本
-            const script = document.createElement('script');
-            script.src = 'https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.20/libs/cn/index.js';
-            script.onload = function() {
-                loadingSub.textContent = '加载完成，初始化中...';
-                initChat();
-            };
-            script.onerror = function() {
-                loadingSub.textContent = '加载失败，请点击下方按钮';
-                fallbackBtn.classList.add('show');
-            };
-            document.head.appendChild(script);
-
-            // 超时处理：15秒后显示备用按钮
-            setTimeout(function() {
-                if (!document.getElementById('coze-chat').innerHTML) {
-                    fallbackBtn.classList.add('show');
-                    loadingSub.textContent = '加载时间较长，您也可以直接打开';
+        setTimeout(function(){
+            var f=document.getElementById('chatFrame');
+            try{
+                if(!f.contentDocument&&!f.contentWindow){
+                    document.getElementById('errorOverlay').classList.add('show');
                 }
-            }, 15000);
-        }
-
-        function initChat() {
-            if (!window.CozeWebSDK) {
-                document.getElementById('loadingSub').textContent = 'SDK 加载异常，请点击下方按钮';
-                document.getElementById('fallbackBtn').classList.add('show');
-                return;
-            }
-
-            const webChatClient = new window.CozeWebSDK.WebChatClient({
-                config: {
-                    bot_id: BOT_ID,
-                },
-                componentProps: {
-                    title: '梅小文 · 红色讲解助手',
-                },
-                auth: {
-                    type: 'token',
-                    token: PAT_TOKEN,
-                },
-            });
-
-            // 隐藏加载层，显示聊天
-            document.getElementById('loadingOverlay').classList.remove('show');
-            document.getElementById('chatContainer').classList.add('show');
-            document.getElementById('backBtn').classList.add('show');
-        }
-
-        function goHome() {
-            document.getElementById('chatContainer').classList.remove('show');
-            document.getElementById('backBtn').classList.remove('show');
-            document.getElementById('coze-chat').innerHTML = '';
-            document.getElementById('mainHeader').style.display = '';
-            document.getElementById('headerSpacer').style.display = '';
-            document.getElementById('mainContent').style.display = '';
-            document.getElementById('mainFooter').style.display = '';
-            document.getElementById('loadingOverlay').classList.remove('show');
-            document.getElementById('fallbackBtn').classList.remove('show');
-        }
+            }catch(e){}
+        },12000);
+        document.getElementById('chatFrame').onload=function(){
+            document.getElementById('errorOverlay').classList.remove('show');
+        };
     </script>
 </body>
 </html>
