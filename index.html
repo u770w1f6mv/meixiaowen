@@ -392,192 +392,57 @@
             bubbleTimeout = setTimeout(hideBubble, 3500);
         }
 
-        // ===== 聊天功能（超时保护 + iframe 备用方案）=====
-        let cozeClient = null;
-        let chatInitialized = false;
-        let loadTimer = null;
-        const SDK_TIMEOUT = 15000; // 15秒超时
-        const BOT_ID = '7672718942758256680';
-        const BOT_SHARE_URL = 'https://www.coze.cn/share/' + BOT_ID;
-        const SDK_URL = 'https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.20/libs/cn/index.js';
+        // ===== 聊天功能（直接 iframe 嵌入，无需下载 SDK）=====
+        const BOT_SHARE_URL = 'https://www.coze.cn/share/7672718942758256680';
 
-        function showLoading() {
+        function startChat() {
             const chatFrame = document.getElementById('chatFrame');
             const chatArea = document.getElementById('chatArea');
             const header = document.querySelector('.header');
             const headerSpacer = document.querySelector('.header-spacer');
             
-            chatFrame.style.cssText = 'display:flex!important; position:fixed!important; top:0!important; left:0!important; width:100vw!important; height:100vh!important; z-index:99999!important; background:#FAF6F0!important; align-items:center!important; justify-content:center!important; flex-direction:column!important;';
+            // 显示聊天框架（全屏覆盖）
+            chatFrame.style.cssText = 'display:flex!important; position:fixed!important; top:0!important; left:0!important; width:100vw!important; height:100vh!important; z-index:99999!important; background:#fff!important;';
+            
+            // 隐藏首页内容
+            if (chatArea) chatArea.style.display = 'none';
+            if (header) header.style.display = 'none';
+            if (headerSpacer) headerSpacer.style.display = 'none';
+            
+            // 显示加载提示
             chatFrame.innerHTML = [
-                '<div style="text-align:center;width:80%;">',
-                '  <div style="width:48px;height:48px;border:4px solid #e0d5c5;border-top:4px solid #8B0000;border-radius:50%;animation:cozeSpin 1s linear infinite;margin:0 auto 20px;"></div>',
-                '  <div style="font-size:17px;color:#8B0000;font-weight:500;margin-bottom:10px;">正在连接梅小文...</div>',
-                '  <div id="loadStatus" style="font-size:13px;color:#999;margin-bottom:20px;">正在加载聊天服务</div>',
-                '  <div id="loadProgress" style="width:200px;height:4px;background:#e0d5c5;border-radius:2px;margin:0 auto;overflow:hidden;">',
-                '    <div id="loadProgressBar" style="width:0%;height:100%;background:#8B0000;border-radius:2px;transition:width 0.3s;"></div>',
-                '  </div>',
-                '  <div id="loadFallback" style="display:none;margin-top:24px;">',
-                '    <div style="font-size:14px;color:#666;margin-bottom:16px;">聊天服务连接较慢，你可以：</div>',
-                '    <button onclick="retryLoadChat()" style="display:block;margin:8px auto;padding:10px 28px;background:#8B0000;color:white;border:none;border-radius:8px;font-size:15px;cursor:pointer;">🔄 重新尝试</button>',
-                '    <button onclick="openIframeFallback()" style="display:block;margin:8px auto;padding:10px 28px;background:#fff;color:#8B0000;border:1px solid #8B0000;border-radius:8px;font-size:15px;cursor:pointer;">💬 直接打开聊天</button>',
-                '    <div style="font-size:12px;color:#bbb;margin-top:12px;">如果多次失败，可能是当前网络无法访问聊天服务，请切换WiFi后重试</div>',
-                '  </div>',
+                '<div style="text-align:center;width:80%;margin:auto;">',
+                '  <div style="width:40px;height:40px;border:3px solid #e0d5c5;border-top:3px solid #8B0000;border-radius:50%;animation:mxwSpin 0.8s linear infinite;margin:0 auto 16px;"></div>',
+                '  <div style="font-size:15px;color:#8B0000;font-weight:500;">正在打开梅小文...</div>',
                 '</div>'
             ].join('');
             
-            // 添加动画样式
-            if (!document.getElementById('cozeSpinStyle')) {
+            // 添加动画
+            if (!document.getElementById('mxwSpinStyle')) {
                 const style = document.createElement('style');
-                style.id = 'cozeSpinStyle';
-                style.textContent = '@keyframes cozeSpin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}';
+                style.id = 'mxwSpinStyle';
+                style.textContent = '@keyframes mxwSpin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}';
                 document.head.appendChild(style);
             }
             
-            chatArea.style.display = 'none';
-            if (header) header.style.display = 'none';
-            if (headerSpacer) headerSpacer.style.display = 'none';
+            // 直接加载 iframe（约 88KB，秒级加载）
+            setTimeout(function() {
+                chatFrame.innerHTML = [
+                    '<div style="width:100%;height:100%;position:relative;">',
+                    '  <div style="position:absolute;top:0;left:0;right:0;height:48px;background:linear-gradient(135deg,#8B0000,#A52A2A);display:flex;align-items:center;justify-content:space-between;padding:0 12px;z-index:10;">',
+                    '    <span style="color:#FFF8E7;font-size:16px;font-weight:600;">梅小文 · 红色讲解助手</span>',
+                    '    <button onclick="closeChat()" style="background:none;border:none;color:#FFF8E7;font-size:24px;cursor:pointer;padding:2px 8px;line-height:1;">&times;</button>',
+                    '  </div>',
+                    '  <iframe src="' + BOT_SHARE_URL + '" style="position:absolute;top:48px;left:0;right:0;bottom:0;width:100%;height:calc(100% - 48px);border:none;" allow="clipboard-read;clipboard-write;microphone"></iframe>',
+                    '</div>'
+                ].join('');
+            }, 500);
         }
 
-        function updateProgress(percent, status) {
-            const bar = document.getElementById('loadProgressBar');
-            const statusEl = document.getElementById('loadStatus');
-            if (bar) bar.style.width = percent + '%';
-            if (statusEl) statusEl.textContent = status;
-        }
-
-        function showFallback() {
-            const fallback = document.getElementById('loadFallback');
-            if (fallback) fallback.style.display = 'block';
-            updateProgress(100, '连接超时');
-        }
-
-        function loadChat() {
-            if (chatInitialized && cozeClient) {
-                const chatFrame = document.getElementById('chatFrame');
-                const chatArea = document.getElementById('chatArea');
-                const header = document.querySelector('.header');
-                const headerSpacer = document.querySelector('.header-spacer');
-                chatFrame.style.cssText = 'display:flex!important; position:fixed!important; top:0!important; left:0!important; width:100vw!important; height:100vh!important; z-index:99999!important; background:#FAF6F0!important;';
-                chatArea.style.display = 'none';
-                if (header) header.style.display = 'none';
-                if (headerSpacer) headerSpacer.style.display = 'none';
-                cozeClient.showChatBot();
-                return;
-            }
-
-            showLoading();
-
-            // 如果SDK已加载，直接初始化
-            if (typeof CozeWebSDK !== 'undefined') {
-                updateProgress(80, '初始化聊天窗口');
-                initCozeSDK();
-                return;
-            }
-
-            updateProgress(20, '正在下载聊天组件...');
-
-            // 动态加载SDK
-            const script = document.createElement('script');
-            script.src = SDK_URL;
-            
-            // 15秒超时
-            loadTimer = setTimeout(function() {
-                if (!chatInitialized) {
-                    updateProgress(60, '连接较慢，正在尝试备用方案...');
-                    setTimeout(function() {
-                        if (!chatInitialized) {
-                            showFallback();
-                        }
-                    }, 5000);
-                }
-            }, SDK_TIMEOUT);
-
-            script.onload = function() {
-                clearTimeout(loadTimer);
-                updateProgress(80, '初始化聊天窗口');
-                initCozeSDK();
-            };
-            
-            script.onerror = function() {
-                clearTimeout(loadTimer);
-                showFallback();
-            };
-            
-            document.head.appendChild(script);
-        }
-
-        function initCozeSDK() {
-            try {
-                cozeClient = new CozeWebSDK.WebChatClient({
-                    config: {
-                        bot_id: BOT_ID,
-                        isIframe: false,
-                    },
-                    componentProps: {
-                        title: '梅小文',
-                    },
-                    auth: {
-                        type: 'token',
-                        token: 'pat_MeQO9ctNEYbVnnsNreaxediUPXLsrwOWIBgtbVOjpyVOiEQnrBsBzdGpKLy7NOX0',
-                        onRefreshToken: function() {
-                            return 'pat_MeQO9ctNEYbVnnsNreaxediUPXLsrwOWIBgtbVOjpyVOiEQnrBsBzdGpKLy7NOX0';
-                        }
-                    },
-                    ui: {
-                        base: {
-                            layout: 'mobile',
-                            lang: 'zh-CN',
-                            zIndex: 99999
-                        },
-                        asstBtn: {
-                            isNeed: false
-                        },
-                        header: {
-                            isShow: true,
-                            isNeedClose: true
-                        }
-                    }
-                });
-                chatInitialized = true;
-                updateProgress(100, '聊天窗口已就绪');
-                
-                setTimeout(function() {
-                    if (cozeClient && typeof cozeClient.showChatBot === 'function') {
-                        cozeClient.showChatBot();
-                    }
-                }, 500);
-            } catch(e) {
-                showFallback();
-            }
-        }
-
-        function retryLoadChat() {
-            // 清除旧脚本重新加载
-            const oldScript = document.querySelector('script[src*="chat-app-sdk"]');
-            if (oldScript) oldScript.remove();
-            chatInitialized = false;
-            cozeClient = null;
-            loadChat();
-        }
-
-        function openIframeFallback() {
-            // 备用方案：直接用iframe嵌入扣子分享页
-            const chatFrame = document.getElementById('chatFrame');
-            chatFrame.innerHTML = [
-                '<div style="width:100%;height:100%;position:relative;">',
-                '  <div style="position:absolute;top:0;left:0;right:0;height:56px;background:linear-gradient(135deg,#8B0000,#A52A2A);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:10;border-radius:0;">',
-                '    <span style="color:#FFF8E7;font-size:17px;font-weight:600;">梅小文 · 红色讲解助手</span>',
-                '    <button onclick="closeIframeChat()" style="background:none;border:none;color:#FFF8E7;font-size:22px;cursor:pointer;padding:4px 8px;">&times;</button>',
-                '  </div>',
-                '  <iframe src="' + BOT_SHARE_URL + '" style="position:absolute;top:56px;left:0;right:0;bottom:0;width:100%;border:none;" allow="clipboard-read;clipboard-write"></iframe>',
-                '</div>'
-            ].join('');
-            chatFrame.style.cssText = 'display:flex!important; position:fixed!important; top:0!important; left:0!important; width:100vw!important; height:100vh!important; z-index:99999!important; background:#fff!important;';
-        }
-
-        function closeIframeChat() {
+        function closeChat() {
             const chatFrame = document.getElementById('chatFrame');
             chatFrame.style.display = 'none';
+            chatFrame.innerHTML = '';
             const chatArea = document.getElementById('chatArea');
             if (chatArea) chatArea.style.display = '';
             const header = document.querySelector('.header');
@@ -585,6 +450,9 @@
             if (header) header.style.display = '';
             if (headerSpacer) headerSpacer.style.display = '';
         }
-    </script>
+
+        // 兼容旧代码：loadChat 映射到 startChat
+        function loadChat() { startChat(); }
+        function closeIframeChat() { closeChat(); }</script>
 </body>
 </html>
