@@ -52,12 +52,13 @@
         .mxw-bubble{position:fixed;bottom:240px;right:8px;background:#fff;color:#8B0000;padding:8px 12px;border-radius:14px 14px 4px 14px;font-size:11px;box-shadow:0 2px 10px rgba(139,0,0,0.1);z-index:90;max-width:145px;line-height:1.5;border:1px solid #E8E0D4;opacity:0;transform:translateY(6px);transition:opacity 0.3s,transform 0.3s;pointer-events:none}
         .mxw-bubble.show{opacity:1;transform:translateY(0)}
 
-        /* ===== Chat in card ===== */
-        .chat-in-card{display:none;width:100%;height:100%;position:absolute;top:0;left:0;overflow:hidden;border-radius:14px}
-        .chat-in-card.active{display:block}
-        .chat-iframe{width:400px;height:640px;border:none;transform-origin:0 0}
-        .chat-back-btn{display:none;position:absolute;top:8px;left:8px;z-index:10;background:linear-gradient(135deg,#8B0000,#A52A2A);color:#FFD700;border:none;border-radius:18px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
-        .chat-back-btn.show{display:block}
+        /* ===== Chat overlay (popup) ===== */
+        .chat-popup-hint{display:none;text-align:center;padding:20px 16px;color:#8B0000}
+        .chat-popup-hint.show{display:block}
+        .chat-popup-hint p{font-size:13px;line-height:1.6;margin-bottom:12px;color:#666}
+        .chat-popup-btn{display:inline-block;padding:11px 28px;background:linear-gradient(135deg,#8B0000,#A52A2A);color:#FFD700;border:none;border-radius:22px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 3px 10px rgba(139,0,0,0.2);margin:6px}
+        .chat-popup-btn:active{transform:scale(0.96)}
+        .chat-open-link{color:#8B0000;font-size:12px;text-decoration:underline;display:inline-block;margin-top:8px}
 
         /* ===== Mobile ===== */
         @media(max-width:420px){
@@ -71,7 +72,7 @@
             .sub-bar p{font-size:11px}
             .main-wrap{padding:6px 10px 24px}
             .content-card{padding:24px 16px 32px;min-height:360px}
-            .content-card.chat-active{height:500px;padding:8px}
+            .content-card.chat-active{height:520px;padding:8px}
             .avatar-wrap{width:86px;height:86px}
             .main-title{font-size:20px}
             .main-desc{font-size:12px}
@@ -114,8 +115,11 @@
                 <div class="main-desc">南京梅园新村 · 云南南华长征古道<br>红色历史、人物故事、参观导览，都可以问我哦！</div>
                 <button class="start-btn" onclick="startChat()">开始对话</button>
             </div>
-            <div class="chat-in-card" id="chatInCard">
-                <div id="chatIframeContainer"></div>
+            <div class="chat-popup-hint" id="chatPopup">
+                <p style="font-size:16px;color:#8B0000;font-weight:600;margin-bottom:12px">🎉 梅小文已就绪！</p>
+                <p>点击下方按钮开始与梅小文对话<br>聊完按返回键回到这里～</p>
+                <button class="chat-popup-btn" onclick="openChat()">打开梅小文对话</button><br>
+                <a class="chat-open-link" href="https://www.coze.cn/store/agent/7672751495569276978" target="_blank">或直接访问扣子页面</a>
             </div>
         </div>
     </div>
@@ -142,28 +146,16 @@
         function hideBubble(){bubbleEl.classList.remove('show')}
         function mxwTap(){idx=(idx+1)%poses.length;imgEl.src=poses[idx];bubbleEl.textContent=bubbles[idx];bubbleEl.classList.add('show');clearTimeout(bTimer);bTimer=setTimeout(hideBubble,3500)}
 
-        /* Chat in card with scaling */
-        function calcAndApplyScale(){
-            var card=document.getElementById('contentCard');
-            var container=document.getElementById('chatIframeContainer');
-            var cw=card.clientWidth-16;
-            var ch=card.clientHeight-16;
-            // iframe base size
-            var baseW=400,baseH=640;
-            var scale=Math.min(cw/baseW,ch/baseH);
-            container.innerHTML='<iframe class="chat-iframe" src="'+COZE_URL+'" allow="clipboard-read;clipboard-write;microphone" style="transform:scale('+scale+');transform-origin:0 0;width:'+baseW+'px;height:'+baseH+'px;border:none"></iframe>';
-        }
+        /* Open chat in new window */
         function startChat(){
             document.getElementById('welcomeView').style.display='none';
-            document.getElementById('chatInCard').classList.add('active');
-            document.getElementById('chatBackBtn').classList.add('show');
+            document.getElementById('chatPopup').classList.add('show');
             document.getElementById('contentCard').classList.add('chat-active');
-            setTimeout(calcAndApplyScale,100);
         }
+        function openChat(){window.open(COZE_URL,'_blank')}
         function backToHome(){
             document.getElementById('welcomeView').style.display='';
-            document.getElementById('chatInCard').classList.remove('active');
-            document.getElementById('chatBackBtn').classList.remove('show');
+            document.getElementById('chatPopup').classList.remove('show');
             document.getElementById('contentCard').classList.remove('chat-active');
         }
     </script>
